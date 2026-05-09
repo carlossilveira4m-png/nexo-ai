@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: nexo-ai-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-nexo_ai}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - nexo-ai-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgvector:
+    image: pgvector/pgvector:pg15
+    container_name: nexo-ai-pgvector
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-nexo_ai}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgvector_data:/var/lib/postgresql/data
+    networks:
+      - nexo-ai-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexo-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nexo-ai-network
+    command: redis-server --appendonly yes
+
+volumes:
+  postgres_data:
+  pgvector_data:
+  redis_data:
+
+networks:
+  nexo-ai-network:
+    driver: bridge
