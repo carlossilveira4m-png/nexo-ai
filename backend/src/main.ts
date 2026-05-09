@@ -1,9 +1,10 @@
 import 'dotenv/config';
-import express, { Express } from 'express';
+import express from 'express';
 import cors from 'cors';
 import { logger } from './utils/logger';
+import paymentRoutes from './routes/payments';
 
-const app: Express = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
@@ -20,12 +21,12 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
-// Routes (to be added)
+// Routes
+app.use('/api/payments', paymentRoutes);
 // app.use('/api/auth', authRoutes);
 // app.use('/api/chat', chatRoutes);
 // app.use('/api/memory', memoryRoutes);
 // app.use('/api/tasks', taskRoutes);
-// app.use('/api/payments', paymentRoutes);
 // app.use('/api/user', userRoutes);
 
 // Error handling
@@ -38,7 +39,7 @@ app.use((err: any, req: any, res: any, next: any) => {
 
 app.listen(PORT, () => {
   logger.info(`🚀 Server is running on port ${PORT}`);
-  logger.info(`📊 Environment: ${process.env.NODE_ENV}`);
+  logger.info(`📋 Environment: ${process.env.NODE_ENV}`);
   logger.info(`🔗 API URL: ${process.env.API_URL}`);
 });
 
